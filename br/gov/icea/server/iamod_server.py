@@ -30,6 +30,8 @@ revision 0.1  2016/dec  conte
 initial release (Linux/Python)
 ---------------------------------------------------------------------------------------------------
 """
+from Crypto.Signature.PKCS1_PSS import MGF1
+
 __version__ = "$revision: 0.3$"
 __author__ = "Samuel Miranda"
 __date__ = "2017/08"
@@ -45,8 +47,7 @@ import os
 import socket
 import threading
 import time
-
-import sys
+import graypy
 
 # iamod library
 import br.gov.icea.utils.adsb.adsb_decoder as axdc
@@ -63,6 +64,12 @@ import br.gov.icea.utils.forwarders.dump1090_fwrd as f1090
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 M_LOG_FILE = "iamod_server.log"
+
+# graylog
+M_GRAYLOG = logging.getLogger('IAMOD_SERVER')
+handler = graypy.GELFHandler('172.18.97.188', 12201)
+M_GRAYLOG.setLevel(logging.DEBUG)
+M_GRAYLOG.addHandler(handler)
 
 # convertions
 M_FT_TO_M = 0.3048
@@ -380,6 +387,7 @@ class CIAMODServer(object):
                     # accept message
                     print "process_msg:'%s'\t%d\t%s[OK]%s" % (fs_adsb_msg, lf_dist_3d, bcolors.OKBLUE, bcolors.ENDC)
                     M_LOG.info("process_msg:'%s'\t%d [OK]" % (fs_adsb_msg, lf_dist_3d))
+                    M_GRAYLOG.info("process_msg:'%s'\t%d [OK]" % (fs_adsb_msg, lf_dist_3d))
 
                     # for all forwarders...
                     for l_frwd in self.__lst_forwarders:
@@ -391,6 +399,7 @@ class CIAMODServer(object):
                     # drop message
                     print "process_msg:'%s'\t%d\t%s[FAIL]%s" % (fs_adsb_msg, lf_dist_3d, bcolors.FAIL, bcolors.ENDC)
                     M_LOG.info("process_msg:'%s'\t%d [FAIL]" % (fs_adsb_msg, lf_dist_3d))
+                    M_GRAYLOG.critical("process_msg:'%s'\t%d [FAIL]" % (fs_adsb_msg, lf_dist_3d))
 
         # delete processed messages 
         self.__count_messages(fs_adsb_msg, True)
@@ -536,7 +545,7 @@ def main():
     print "    | |   / /\ \ | |\/| | |  | | |  | |  \___ \|  __| |  _  / \ \/ / |  __| |  _  /  "
     print "   _| |_ / ____ \| |  | | |__| | |__| |  ____) | |____| | \ \  \  /  | |____| | \ \  "
     print "  |_____/_/    \_\_|  |_|\____/|_____/  |_____/|______|_|  \_\  \/   |______|_|  \_\ "
-    print 
+    print
 
     # create server
     l_iamodserver = CIAMODServer()
