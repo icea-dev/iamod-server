@@ -30,7 +30,6 @@ revision 0.1  2016/dec  conte
 initial release (Linux/Python)
 ---------------------------------------------------------------------------------------------------
 """
-from Crypto.Signature.PKCS1_PSS import MGF1
 
 __version__ = "$revision: 0.3$"
 __author__ = "Samuel Miranda"
@@ -51,12 +50,13 @@ import graypy
 
 # iamod library
 import br.gov.icea.utils.adsb.adsb_decoder as axdc
-import br.gov.icea.utils.adsb.decoder as dcdr
 import br.gov.icea.utils.asterix.asterix_encoder as axec
+import br.gov.icea.utils.adsb.decoder as dcdr
 import br.gov.icea.utils.bcolors as bcolors
 import br.gov.icea.utils.calc.geo_utils as gutl
 import br.gov.icea.utils.calc.mlat as mlat
 import br.gov.icea.utils.forwarders.dump1090_fwrd as f1090
+import br.gov.icea.utils.forwarders.asterix_fwrd as fast
 
 # < module defs >----------------------------------------------------------------------------------
 
@@ -91,6 +91,10 @@ M_ODD_MSG = 1
 
 # speed of light (in meters per second)
 M_LIGHT_SPEED = 299792458.
+
+# asterix server
+M_ASTERIX_PORT = 15000
+M_ASTERIX_HOST = "localhost"
 
 # < class CBusterServer >--------------------------------------------------------------------------
 
@@ -243,7 +247,7 @@ class CIAMODServer(object):
 
         # create message queue
         l_queue = Queue.Queue()
-        assert l_queue 
+        assert l_queue
 
         # create a decoder for ADS-B messages
         l_decoder = axdc.AdsBDecoder(self.__i_asterix_sic)
@@ -292,7 +296,7 @@ class CIAMODServer(object):
                 # destiny is asterix ?
                 if "asterix" == ldct_dest["type"].lower():
                     # enable asterix server
-                    self.__v_asterix_server = True
+                    #self.__v_asterix_server = True
 
                     # asterix parameters
                     self.__i_asterix_sic = int(ldct_dest["sic"])

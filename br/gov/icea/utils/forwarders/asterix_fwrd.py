@@ -47,7 +47,7 @@ class AsterixForwarder(AdsbForwarder):
 
         """
         # logger [Logger Object]:
-        self.logger = logging.getLogger('adsb_in_app.AsterixForwarder')
+        self.logger = logging.getLogger('IAMOD_SERVER.AsterixForwarder')
 
         # s [socket]: The end point to send data.
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
