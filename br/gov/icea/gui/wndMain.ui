@@ -17,9 +17,12 @@
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <widget class="QTabWidget" name="tabWidget">
-      <widget class="QWidget" name="tab">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="tabStatus">
        <attribute name="title">
-        <string>Tab 1</string>
+        <string>Server Status</string>
        </attribute>
        <widget class="QGroupBox" name="groupBox">
         <property name="geometry">
@@ -85,20 +88,121 @@
          </property>
         </widget>
        </widget>
-       <zorder>groupBox</zorder>
-       <zorder>groupBox_2</zorder>
-       <zorder>pbStop</zorder>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="tabParameters">
        <attribute name="title">
-        <string>Tab 2</string>
+        <string>Server Parameters</string>
        </attribute>
+       <widget class="QGroupBox" name="gbGraylog">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>10</y>
+          <width>188</width>
+          <height>96</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Graylog Configuration</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QSplitter" name="splitter">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>IP:</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="leGraylogIP">
+            <property name="inputMask">
+             <string/>
+            </property>
+           </widget>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSplitter" name="splitter_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Port:</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="leGraylogPort">
+            <property name="inputMask">
+             <string/>
+            </property>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QGroupBox" name="gbAsterix">
+        <property name="geometry">
+         <rect>
+          <x>250</x>
+          <y>20</y>
+          <width>211</width>
+          <height>96</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Asterix Server Configuration</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QSplitter" name="splitter_4">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>IP:</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="leAsterixIP"/>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSplitter" name="splitter_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Port:</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="leAsterixPort"/>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QPushButton" name="pbSaveConfiguration">
+        <property name="geometry">
+         <rect>
+          <x>190</x>
+          <y>200</y>
+          <width>98</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Save</string>
+        </property>
+       </widget>
       </widget>
      </widget>
     </item>
    </layout>
-   <zorder>pbStart</zorder>
-   <zorder>tabWidget</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -113,6 +217,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionLoad_Config_File"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
@@ -133,6 +238,11 @@
   <action name="actionLicense">
    <property name="text">
     <string>License</string>
+   </property>
+  </action>
+  <action name="actionLoad_Config_File">
+   <property name="text">
+    <string>Load Config File</string>
    </property>
   </action>
  </widget>
