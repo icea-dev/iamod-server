@@ -47,6 +47,7 @@ import socket
 import threading
 import time
 import graypy
+import sys
 
 # iamod library
 import br.gov.icea.utils.adsb.adsb_decoder as axdc
@@ -67,9 +68,6 @@ M_LOG_FILE = "iamod_server.log"
 
 # graylog
 M_GRAYLOG = logging.getLogger('IAMOD_SERVER')
-handler = graypy.GELFHandler('172.18.97.188', 12201)
-M_GRAYLOG.setLevel(logging.DEBUG)
-M_GRAYLOG.addHandler(handler)
 
 # convertions
 M_FT_TO_M = 0.3048
@@ -77,11 +75,11 @@ M_KT_TO_MPS = 0.514444
 M_FTPM_TO_MPS = 0.00508
 
 # receiver
-M_NET_PORT = 12270
+#M_NET_PORT = 12270
 M_RECV_BUFF_SIZE = 1024
 
 # distance threshold (m)
-M_THRESHOLD = 6000
+#M_THRESHOLD = 6000
 
 # tempo para estatística (s)
 M_TIM_STAT = 60
@@ -280,6 +278,17 @@ class CIAMODServer(object):
             # load file through parser
             l_cparser.read(fs_config)
 
+            #Graylog configuration
+            graylogIp = l_cparser.get("graylog", "server")
+            graylogPort = l_cparser.get("graylog", "port")
+            handler = graypy.GELFHandler(graylogIp, int(graylogPort))
+            M_GRAYLOG.setLevel(logging.DEBUG)
+            M_GRAYLOG.addHandler(handler)
+
+            self.__transponderCode = l_cparser.get("iamod", "transponder")
+            self.__rcv_port = int(l_cparser.get("iamod", "port"))
+            self.__threshold = int(l_cparser.get("iamod", "threshold"))
+
             # reading destinations to forward reliable messages
             for l_dst in l_cparser.get("glb", "destinations").split():
                 # get section items as tuples list
@@ -296,7 +305,7 @@ class CIAMODServer(object):
                 # destiny is asterix ?
                 if "asterix" == ldct_dest["type"].lower():
                     # enable asterix server
-                    #self.__v_asterix_server = True
+                    self.__v_asterix_server = True
 
                     # asterix parameters
                     self.__i_asterix_sic = int(ldct_dest["sic"])
@@ -387,7 +396,7 @@ class CIAMODServer(object):
                 #M_LOG.debug("lf_dist_3d: {}".format(lf_dist_3d))
 
                 # distance inside acceptable range ?
-                if lf_dist_3d <= M_THRESHOLD:
+                if lf_dist_3d <= self.__threshold:
                     # accept message
                     print "process_msg:'%s'\t%d\t%s[OK]%s" % (fs_adsb_msg, lf_dist_3d, bcolors.OKBLUE, bcolors.ENDC)
                     M_LOG.info("process_msg:'%s'\t%d [OK]" % (fs_adsb_msg, lf_dist_3d))
@@ -412,7 +421,7 @@ class CIAMODServer(object):
         return True
 
     # ---------------------------------------------------------------------------------------------
-    def __receive(self, fdct_rcv_msg):
+    def __receive(self, fdct_rcv_msg, port):
         """
         loop de recebimento das mensagens
         """
@@ -428,10 +437,10 @@ class CIAMODServer(object):
         l_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
         # bind socket
-        l_sock.bind(('', M_NET_PORT))
+        l_sock.bind(('', port))
 
         # show
-        print "waiting on port: {}".format(M_NET_PORT)
+        print "waiting on port: {}".format(port)
 
         # initial time
         lf_now = time.time()
@@ -484,7 +493,7 @@ class CIAMODServer(object):
         run adsb-in
         """
         # create receive messages thread
-        lthr_rcv = threading.Thread(target=self.__receive, args=(self.__dct_rcv_msg,))
+        lthr_rcv = threading.Thread(target=self.__receive, args=(self.__dct_rcv_msg, self.__rcv_port))
         assert lthr_rcv
 
         lthr_rcv.daemon = True
@@ -538,21 +547,26 @@ class CIAMODServer(object):
 
 # -------------------------------------------------------------------------------------------------
 
-def main():
+def main(argv):
     """
     jump start
     """
     # show logo
     print "   _____          __  __  ____  _____     _____ ______ _______      ________ _____   "
-    print "  |_   _|   /\   |  \/  |/ __ \|  __ \   / ____|  ____|  __ \ \    / /  ____|  __ \ "
+    print "  |_   _|   /\   |  \/  |/ __ \|  __ \   / ____|  ____|  __ \ \    / /  ____|  __ \  "
     print "    | |    /  \  | \  / | |  | | |  | | | (___ | |__  | |__) \ \  / /| |__  | |__) | "
     print "    | |   / /\ \ | |\/| | |  | | |  | |  \___ \|  __| |  _  / \ \/ / |  __| |  _  /  "
     print "   _| |_ / ____ \| |  | | |__| | |__| |  ____) | |____| | \ \  \  /  | |____| | \ \  "
     print "  |_____/_/    \_\_|  |_|\____/|_____/  |_____/|______|_|  \_\  \/   |______|_|  \_\ "
     print
 
+    try:
+        configFile = argv[1]
+    except:
+        configFile = "iamod_server.cfg"
+
     # create server
-    l_iamodserver = CIAMODServer()
+    l_iamodserver = CIAMODServer(configFile)
     assert l_iamodserver
 
     # run server
@@ -567,6 +581,6 @@ if "__main__" == __name__:
     logging.basicConfig(filename=M_LOG_FILE, filemode='w', format='%(asctime)s %(levelname)s: (%(threadName)-9s) %(message)s')
 
     # jump start
-    main()
+    main(sys.argv)
 
 # < the end >--------------------------------------------------------------------------------------

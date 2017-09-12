@@ -1,17 +1,3 @@
-# Import PySide classes
-# import sys
-# from PySide.QtCore import *
-# from PySide.QtGui import *
-#
-# # Create a Qt application
-# app = QApplication(sys.argv)
-# # Create a Label and show it
-# label = QLabel("Hello World")
-# label.show()
-# # Enter Qt application main loop
-# app.exec_()
-# sys.exit()
-
 import sys
 import subprocess
 import platform
@@ -19,17 +5,16 @@ import os
 import ConfigParser
 
 import PySide
-from PySide.QtCore import QRegExp
-from PySide.QtGui import QMainWindow, QApplication, QMessageBox, QRegExpValidator, QIntValidator, QFileDialog, QLabel, QLineEdit
+from PySide.QtCore import QRegExp, QUrl
+from PySide.QtGui import QMainWindow, QApplication, QMessageBox, QRegExpValidator, QIntValidator, QFileDialog
+from PySide.QtWebKit import QWebView, QWebSettings
 
 from wndMain import Ui_MainWindow
 
-__version__ = '0.0.1'
+__version__ = '0.1.0'
 
 __basePath__ = os.path.abspath(os.path.join(os.getcwd(), '../../../..'))
 __packagePath__ = '/br/gov/icea/'
-
-print "basePath: " + __basePath__
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -57,8 +42,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionLicense.triggered.connect(self.__license)
         self.actionLoad_Config_File.triggered.connect(self.__dialogConfigFile)
 
-        self.tabWidget.currentChanged.connect(self.__tabSelection)
-
         self.pbSaveConfiguration.clicked.connect(self.__writeConfigFile)
 
         if self.__checkServerIsRunning():
@@ -66,14 +49,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.__serverStatusImage(False)
 
-        self.__tabSelection()
-
         self.configFile = ConfigParser.ConfigParser()
+
+        self.view = QWebView()
+        self.webLayout.addWidget(self.view)
+
+        self.view.settings().setAttribute(QWebSettings.JavascriptCanOpenWindows, True)
+        self.view.settings().setAttribute(QWebSettings.LocalStorageEnabled, True)
+
+        self.view.load(QUrl("http://172.18.97.188:9000"))
+        self.view.show()
 
     def __dialogConfigFile(self):
         self.configFileName = QFileDialog.getOpenFileName()
         self.__loadConfigFile()
-
 
     def __startServer(self):
         self.__serverStartStop('START')
@@ -121,14 +110,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if self.__checkServerIsRunning():
                 self.statusbar.showMessage("IAMOD Server is running")
             else:
-                subprocess.Popen(scriptPath + "startServer.sh %s" %(str(iamodModule)), shell=True)
+                print "teste: " + scriptPath + "startServer.sh %s %s" %(str(iamodModule), str(self.configFileName[0]))
+                subprocess.Popen(scriptPath + "startServer.sh %s %s" %(str(iamodModule), str(self.configFileName[0])), shell=True)
                 self.statusbar.showMessage("Start IAMOD Server")
                 self.__serverStatusImage(True)
-
+            self.__blockEditConfiguration(False)
         else:
             subprocess.Popen(scriptPath + "stopServer.sh", shell=True)
             self.statusbar.showMessage("Stop IAMOD Server")
             self.__serverStatusImage(False)
+            self.__blockEditConfiguration(True)
+
 
     def __serverStatusImage(self, image):
         if image == True:
@@ -136,12 +128,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.statusImage.setPixmap(__basePath__ + __packagePath__ + '/gui/icons/serverOff.png')
 
-    def __tabSelection(self):
-        if (self.tabWidget.currentIndex() == 1):
-            self.__blockEditConfiguration(not self.__checkServerIsRunning())
-
     def __blockEditConfiguration(self, block):
-        self.tabWidget.currentWidget().setEnabled(block)
+        self.gbConfiguration.setEnabled(block)
 
     def __loadConfigFile(self):
         fileName = self.configFileName[0]
@@ -166,20 +154,60 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             asterixPort = self.configFile.get("asterix", "port")
         except:
             asterixPort = ""
+        try:
+            asterixSic = self.configFile.get("asterix", "sic")
+        except:
+            asterixSic = ""
+        try:
+            iamodTranponderCode = self.configFile.get("iamod", "transponder")
+        except:
+            iamodTranponderCode = ""
+        try:
+            iamodPort = self.configFile.get("iamod", "port")
+        except:
+            iamodPort = ""
+        try:
+            iamodThreshold = self.configFile.get("iamod", "threshold")
+        except:
+            iamodThreshold = ""
+
         self.leGraylogIP.setText(graylogIp)
         self.leGraylogPort.setText(graylogPort)
+
         self.leAsterixIP.setText(asterixIp)
         self.leAsterixPort.setText(asterixPort)
+        self.leAsterixSic.setText(asterixSic)
 
+        self.leIamodTransponder.setText(iamodTranponderCode)
+        self.leIamodPort.setText(iamodPort)
+        self.leIamodThreshold.setText(iamodThreshold)
 
     def __writeConfigFile(self):
-        print "wrinting"
+        cfgFile = open(self.configFileName[0], 'w')
+
         asterixIp = self.leAsterixIP.text()
         asterixPort = self.leAsterixPort.text()
-        print "IP: " + asterixIp + " port: " + asterixPort
+        asterixSic = self.leAsterixSic.text()
+
+        graylogIp = self.leGraylogIP.text()
+        graylogPort = self.leGraylogPort.text()
+
+        iamodTranponderCode = self.leIamodTransponder.text()
+        iamodPort = self.leIamodPort.text()
+        iamodThreshold = self.leIamodThreshold.text()
+
         self.configFile.set("asterix","server",asterixIp)
         self.configFile.set("asterix", "port", asterixPort)
-        self.configFile.write(self.configFile[0])
+        self.configFile.set("asterix", "sic", asterixSic)
+
+        self.configFile.set("graylog", "server", graylogIp)
+        self.configFile.set("graylog", "port", graylogPort)
+
+        self.configFile.set("iamod", "transponder", iamodTranponderCode)
+        self.configFile.set("iamod", "port", iamodPort)
+        self.configFile.set("iamod", "threshold", iamodThreshold)
+
+        self.configFile.write(cfgFile)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
