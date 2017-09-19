@@ -88,14 +88,16 @@ def load_asterix_category_format(k):
     """
     global filenames
     try:
+        __basePath__ = os.path.abspath(os.path.join(os.getcwd(), '../../../..'))
+
         # Look for file in current executing directory
         path_filename1 = filenames[k]
 
         # On default directory (absolute)
-        path_filename2 = "/opt/atn-sim/configs/asterix/" + filenames[k]
+        path_filename2 = __basePath__ + "/" +filenames[k]
 
         # On default directory (relative)
-        path_filename3 = os.path.dirname(os.path.realpath(__file__)) + "../../../config/asterix/" + filenames[k]
+        path_filename3 = os.path.dirname(os.path.realpath(__file__)) + "/xml/" + filenames[k]
 
         if os.path.isfile(path_filename1):
             # print "Loading file '%s'" % path_filename1

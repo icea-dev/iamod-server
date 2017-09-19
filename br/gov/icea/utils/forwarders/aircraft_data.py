@@ -84,6 +84,17 @@ class AircraftData(object):
         ## oldUpdateTime [int]: The update time.
         self.oldUpdateTime = 0
 
+        ## Target Status
+        self.target_status = 0
+
+        self.transponder_code = '0000'
+
+    def set_target_status(self, target_status):
+        self.target_status = target_status
+
+
+    def set_transponder_code(self, transponder_code):
+        self.transponder_code = transponder_code
 
     def set_callsign(self, callsign):
         """Sets callsign of the aircraft.
@@ -265,6 +276,9 @@ class AircraftData(object):
         # Grouns speed in NM/s
         gs = self.ground_speed / 3600.0
 
+        if not self.transponder_code:
+            print "Mode3A: " + self.transponder_code
+
         record = {10: {'SAC': self.SAC, 'SIC': self.sic},
                   40: {'DCR': 0, 'GBS': 0, 'SIM': 0, 'TST': 0, 'RAB': 0, 'SAA': 1, 'SPI': self.spi, 'ATP': 1, 'ARC': 1},
                   30: {'ToD': self.time_of_day},
@@ -277,7 +291,8 @@ class AircraftData(object):
                   160: {'GS': gs, 'TA': self.heading},
                   170: {'TId': self.callsign_to_bcd()},
                   95: {'VA': self.NACv},
-                  200: {'PS': 0}}
+                  200: {'PS': self.target_status},
+                  70: {'V': 0, 'G': 0, 'L':0, 'Mode3A': int(self.transponder_code, 8)}}
 
         # if callsign is empty remove Data Item I021/170, Target Identification
         if (not self.callsign):

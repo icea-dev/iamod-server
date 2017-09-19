@@ -29,12 +29,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                  + "\\." + ipRange + "$")
         ipValidator = QRegExpValidator(self.leGraylogIP)
         ipValidator.setRegExp(ipRegex)
-
         self.leGraylogIP.setValidator(ipValidator)
         self.leGraylogPort.setValidator(QIntValidator(1, 65535))
+        self.leGraylogHttpPort.setValidator(QIntValidator(1, 65535))
 
+        ipValidator = QRegExpValidator(self.leAsterixIP)
+        ipValidator.setRegExp(ipRegex)
         self.leAsterixIP.setValidator(ipValidator)
         self.leAsterixPort.setValidator(QIntValidator(1, 65535))
+        self.leAsterixSic.setValidator(QIntValidator(1, 256))
+
+        self.leIamodPort.setValidator(QIntValidator(1, 65535))
+        self.leIamodThreshold.setValidator(QIntValidator(0, 99999))
+
+        transponderRange = "(?:[0-7]?[0-7]?[0-7]?[0-7])"
+        transponderRegex = QRegExp("^" + transponderRange)
+        transponderValidator = QRegExpValidator(self.leIamodTransponder)
+        transponderValidator.setRegExp(transponderRegex)
+        self.leIamodTransponder.setValidator(transponderValidator)
 
         #Define functions for GUI actions
         self.pbStart.clicked.connect(self.__startServer)
@@ -43,6 +55,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionLoad_Config_File.triggered.connect(self.__dialogConfigFile)
 
         self.pbSaveConfiguration.clicked.connect(self.__writeConfigFile)
+        self.pbStart.setEnabled(False)
 
         if self.__checkServerIsRunning():
             self.__serverStatusImage(True)
@@ -57,8 +70,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.view.settings().setAttribute(QWebSettings.JavascriptCanOpenWindows, True)
         self.view.settings().setAttribute(QWebSettings.LocalStorageEnabled, True)
 
-        self.view.load(QUrl("http://172.18.97.188:9000"))
-        self.view.show()
+        self.pbConnect.clicked.connect(self.__connectHttpServer)
+
+    def __connectHttpServer(self):
+        retCode = True
+        retCode &= not self.leGraylogIP.text()
+        retCode &= not self.leGraylogPort.text()
+        print "Teste: " + str(retCode)
+        if (not retCode):
+            self.view.load(QUrl("http://" + self.leGraylogIP.text() + ":" + self.leGraylogHttpPort.text() + "/dashboards/599327b2b199cf24b0850bed"))
+            self.view.show()
+        else:
+            QMessageBox.warning(self, "Error", "Please, fill Graylog IP and Http Port before connect!", QMessageBox.Ok)
 
     def __dialogConfigFile(self):
         self.configFileName = QFileDialog.getOpenFileName()
@@ -69,6 +92,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def __stopServer(self):
         self.__serverStartStop('STOP')
+        self.pbStart.setEnabled(False)
 
     def __license(self):
          '''Popup a box with about message.'''
@@ -121,7 +145,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.__serverStatusImage(False)
             self.__blockEditConfiguration(True)
 
-
     def __serverStatusImage(self, image):
         if image == True:
             self.statusImage.setPixmap(__basePath__ + __packagePath__ + '/gui/icons/serverOn.png')
@@ -136,6 +159,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if (os.path.exists(fileName)):
             self.configFile.read(fileName)
             self.__readFile()
+            self.pbStart.setEnabled(True)
 
     def __readFile(self):
         try:
@@ -146,6 +170,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             graylogPort = self.configFile.get("graylog", "port")
         except:
             graylogPort = ""
+        try:
+            graylogHttpPort = self.configFile.get("graylog", "httpPort")
+        except:
+            graylogHttpPort = ""
         try:
             asterixIp = self.configFile.get("asterix", "server")
         except:
@@ -173,6 +201,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.leGraylogIP.setText(graylogIp)
         self.leGraylogPort.setText(graylogPort)
+        self.leGraylogHttpPort.setText(graylogHttpPort)
 
         self.leAsterixIP.setText(asterixIp)
         self.leAsterixPort.setText(asterixPort)
@@ -183,6 +212,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.leIamodThreshold.setText(iamodThreshold)
 
     def __writeConfigFile(self):
+        try:
+            fileName = self.configFileName[0]
+        except:
+            fileName = ""
+        if (not os.path.exists(fileName)):
+            if (self.__validateForm()):
+                self.configFileName = QFileDialog.getSaveFileName()
+            else:
+                QMessageBox.warning(self, "Error", "Please, fill all form before save!", QMessageBox.Ok)
+                return
+
         cfgFile = open(self.configFileName[0], 'w')
 
         asterixIp = self.leAsterixIP.text()
@@ -191,6 +231,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         graylogIp = self.leGraylogIP.text()
         graylogPort = self.leGraylogPort.text()
+        graylogHttpPort = self.leGraylogHttpPort.text()
 
         iamodTranponderCode = self.leIamodTransponder.text()
         iamodPort = self.leIamodPort.text()
@@ -202,6 +243,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.configFile.set("graylog", "server", graylogIp)
         self.configFile.set("graylog", "port", graylogPort)
+        self.configFile.set("graylog", "httpPort", graylogHttpPort)
 
         self.configFile.set("iamod", "transponder", iamodTranponderCode)
         self.configFile.set("iamod", "port", iamodPort)
@@ -209,8 +251,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.configFile.write(cfgFile)
 
+    def __validateForm(self):
+        retCode = True
+        retCode &= not self.leIamodThreshold.text()
+        retCode &= not self.leIamodTransponder.text()
+        retCode &= not self.leIamodPort.text()
+        retCode &= not self.leAsterixIP.text()
+        retCode &= not self.leAsterixPort.text()
+        retCode &= not self.leAsterixSic.text()
+        retCode &= not self.leGraylogIP.text()
+        retCode &= not self.leGraylogPort.text()
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     frame = MainWindow()
-    frame.show()
+    frame.showMaximized()
     app.exec_()

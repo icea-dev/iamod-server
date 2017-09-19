@@ -106,7 +106,6 @@ class AdsBAsterixEncode(object):
         # print ("%x" % data_bin)
         msg = hex(data_bin).rstrip("L").lstrip("0x")
         self.sock.sendto(binascii.unhexlify(msg), (self.net, self.port))
-        print msg
 
     def service_message(self):
         """

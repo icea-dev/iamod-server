@@ -111,7 +111,6 @@ class AsterixForwarder(AdsbForwarder):
         time_of_day = int(time_utc.tm_hour) * 3600 + int(time_utc.tm_min) * 60 + int(time_utc.tm_sec)
 
         data = message + hex(time_of_day).rstrip("L").lstrip("0x")
-
         self.send_msg(data)
 
     def __str__(self):

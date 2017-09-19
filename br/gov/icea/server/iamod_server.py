@@ -48,9 +48,11 @@ import threading
 import time
 import graypy
 import sys
+import binascii
 
 # iamod library
 import br.gov.icea.utils.adsb.adsb_decoder as axdc
+import br.gov.icea.utils.adsb.adsb_utils as adsb_utils
 import br.gov.icea.utils.asterix.asterix_encoder as axec
 import br.gov.icea.utils.adsb.decoder as dcdr
 import br.gov.icea.utils.bcolors as bcolors
@@ -129,6 +131,10 @@ class CIAMODServer(object):
 
         # create message dict
         self.__dct_rcv_msg = {}
+
+        # create list of attacked icao code
+        self.__icao24 = {}
+        self.__timeout = 300
 
         # load config file
         self.__load_config(fs_config)
@@ -248,7 +254,7 @@ class CIAMODServer(object):
         assert l_queue
 
         # create a decoder for ADS-B messages
-        l_decoder = axdc.AdsBDecoder(self.__i_asterix_sic)
+        l_decoder = axdc.AdsBDecoder(self.__i_asterix_sic, self.__transponderCode)
         assert l_decoder
 
         l_decoder.create_socket(self.__i_asterix_rx_port)
@@ -396,7 +402,7 @@ class CIAMODServer(object):
                 #M_LOG.debug("lf_dist_3d: {}".format(lf_dist_3d))
 
                 # distance inside acceptable range ?
-                if lf_dist_3d <= self.__threshold:
+                if lf_dist_3d <= float(self.__threshold):
                     # accept message
                     print "process_msg:'%s'\t%d\t%s[OK]%s" % (fs_adsb_msg, lf_dist_3d, bcolors.OKBLUE, bcolors.ENDC)
                     M_LOG.info("process_msg:'%s'\t%d [OK]" % (fs_adsb_msg, lf_dist_3d))
@@ -405,7 +411,8 @@ class CIAMODServer(object):
                     # for all forwarders...
                     for l_frwd in self.__lst_forwarders:
                         # send received ADS-B message
-                        l_frwd.forward(fs_adsb_msg, None)
+                        new_adsb_msg = self.__rewrite_icao24(fs_adsb_msg)
+                        l_frwd.forward(new_adsb_msg, None)
 
                 # senão,...
                 else:
@@ -413,6 +420,7 @@ class CIAMODServer(object):
                     print "process_msg:'%s'\t%d\t%s[FAIL]%s" % (fs_adsb_msg, lf_dist_3d, bcolors.FAIL, bcolors.ENDC)
                     M_LOG.info("process_msg:'%s'\t%d [FAIL]" % (fs_adsb_msg, lf_dist_3d))
                     M_GRAYLOG.critical("process_msg:'%s'\t%d [FAIL]" % (fs_adsb_msg, lf_dist_3d))
+                    self.__recordAttackData(fs_adsb_msg)
 
         # delete processed messages 
         self.__count_messages(fs_adsb_msg, True)
@@ -544,6 +552,32 @@ class CIAMODServer(object):
                     time.sleep(0.1)
                 except KeyboardInterrupt:
                     break
+
+    def __recordAttackData(self, message):
+        icao24 = dcdr.get_icao_addr(message)
+        callsign = dcdr.get_callsign(message)
+        self.__icao24[icao24] = time.time()
+        self.__icao24[callsign] = time.time()
+
+    def __rewrite_icao24(self, message):
+        target_status = "0"
+        msg_icao24 = dcdr.get_icao_addr(message)
+        msg_callsign = dcdr.get_callsign(message)
+        if (self.__icao24.has_key(msg_icao24)):
+            last_attack_time = self.__icao24[msg_icao24]
+            if ((time.time() - last_attack_time) < self.__timeout):
+                target_status = "5"
+            else:
+                del self.__icao24[msg_icao24]
+                #return message
+        elif (self.__icao24.has_key(msg_callsign)):
+            last_attack_time = self.__icao24[msg_callsign]
+            if ((time.time() - last_attack_time) < self.__timeout):
+                target_status = "5"
+            else:
+                del self.__icao24[msg_callsign]
+
+        return message + target_status
 
 # -------------------------------------------------------------------------------------------------
 
