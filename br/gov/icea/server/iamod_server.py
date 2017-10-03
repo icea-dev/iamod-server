@@ -411,7 +411,7 @@ class CIAMODServer(object):
                     # for all forwarders...
                     for l_frwd in self.__lst_forwarders:
                         # send received ADS-B message
-                        new_adsb_msg = self.__rewrite_icao24(fs_adsb_msg)
+                        new_adsb_msg = self.__writeTargetStatus(fs_adsb_msg)
                         l_frwd.forward(new_adsb_msg, None)
 
                 # senão,...
@@ -559,7 +559,7 @@ class CIAMODServer(object):
         self.__icao24[icao24] = time.time()
         self.__icao24[callsign] = time.time()
 
-    def __rewrite_icao24(self, message):
+    def __writeTargetStatus(self, message):
         target_status = "0"
         msg_icao24 = dcdr.get_icao_addr(message)
         msg_callsign = dcdr.get_callsign(message)
@@ -569,7 +569,6 @@ class CIAMODServer(object):
                 target_status = "5"
             else:
                 del self.__icao24[msg_icao24]
-                #return message
         elif (self.__icao24.has_key(msg_callsign)):
             last_attack_time = self.__icao24[msg_callsign]
             if ((time.time() - last_attack_time) < self.__timeout):
