@@ -576,13 +576,13 @@ class CIAMODServer(object):
         msg_icao24 = dcdr.get_icao_addr(message)
         msg_callsign = dcdr.get_callsign(message)
         if (self.__icao24.has_key(msg_icao24)):
-            last_attack_time = self.__icao24[msg_icao24]
+            last_attack_time = self.__icao24[msg_icao24][0]
             if ((time.time() - last_attack_time) < self.__timeout):
                 target_status = "5"
             else:
                 del self.__icao24[msg_icao24]
         elif (self.__icao24.has_key(msg_callsign)):
-            last_attack_time = self.__icao24[msg_callsign]
+            last_attack_time = self.__icao24[msg_callsign][0]
             if ((time.time() - last_attack_time) < self.__timeout):
                 target_status = "5"
             else:

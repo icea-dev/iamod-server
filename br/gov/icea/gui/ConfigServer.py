@@ -13,8 +13,6 @@ from wndMain import Ui_MainWindow
 
 from GraphicCanvas import StaticCanvas, DynamicCanvas
 
-from GlobalData import sharedDict
-
 __version__ = '0.1.0'
 
 __basePath__ = os.path.abspath(os.path.join(os.getcwd(), '../../../..'))
@@ -99,10 +97,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def __startServer(self):
         self.__serverStartStop('START')
+        self.pbStop.setEnabled(True)
+        self.pbStart.setEnabled(False)
 
     def __stopServer(self):
         self.__serverStartStop('STOP')
-        self.pbStart.setEnabled(False)
+        self.pbStart.setEnabled(True)
+        self.pbStop.setEnabled(False)
 
     def __license(self):
          '''Popup a box with about message.'''
@@ -144,7 +145,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if self.__checkServerIsRunning():
                 self.statusbar.showMessage("IAMOD Server is running")
             else:
-                print "teste: " + scriptPath + "startServer.sh %s %s" %(str(iamodModule), str(self.configFileName[0]))
                 subprocess.Popen(scriptPath + "startServer.sh %s %s" %(str(iamodModule), str(self.configFileName[0])), shell=True)
                 self.statusbar.showMessage("Start IAMOD Server")
                 self.__serverStatusImage(True)
@@ -255,7 +255,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.configFile.set("graylog", "port", graylogPort)
         self.configFile.set("graylog", "httpPort", graylogHttpPort)
 
-        self.configFile.set("iamod", "transponder", iamodTranponderCode)
+        # self.configFile.set("iamod", "transponder", iamodTranponderCode)
         self.configFile.set("iamod", "port", iamodPort)
         self.configFile.set("iamod", "threshold", iamodThreshold)
 
