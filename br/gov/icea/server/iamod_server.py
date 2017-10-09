@@ -254,7 +254,7 @@ class CIAMODServer(object):
         assert l_queue
 
         # create a decoder for ADS-B messages
-        l_decoder = axdc.AdsBDecoder(self.__i_asterix_sic, self.__transponderCode)
+        l_decoder = axdc.AdsBDecoder(self.__i_asterix_sic)
         assert l_decoder
 
         l_decoder.create_socket(self.__i_asterix_rx_port)
@@ -291,7 +291,7 @@ class CIAMODServer(object):
             M_GRAYLOG.setLevel(logging.DEBUG)
             M_GRAYLOG.addHandler(handler)
 
-            self.__transponderCode = l_cparser.get("iamod", "transponder")
+            # self.__transponderCode = l_cparser.get("iamod", "transponder")
             self.__rcv_port = int(l_cparser.get("iamod", "port"))
             self.__threshold = int(l_cparser.get("iamod", "threshold"))
 
@@ -556,8 +556,20 @@ class CIAMODServer(object):
     def __recordAttackData(self, message):
         icao24 = dcdr.get_icao_addr(message)
         callsign = dcdr.get_callsign(message)
-        self.__icao24[icao24] = time.time()
-        self.__icao24[callsign] = time.time()
+
+        if (self.__icao24.has_key(icao24)):
+            tup = self.__icao24[icao24]
+            count = tup[1] + 1
+        else:
+            count = 0
+        self.__icao24[icao24] = (time.time(), count)
+
+        if (self.__icao24.has_key(callsign)):
+            tup = self.__icao24[callsign]
+            count = tup[1] + 1
+        else:
+            count = 0
+        self.__icao24[callsign] = (time.time(), count)
 
     def __writeTargetStatus(self, message):
         target_status = "0"

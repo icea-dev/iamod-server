@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'wndMain.ui'
 #
-# Created: Thu Sep 14 09:41:28 2017
+# Created: Mon Oct  9 10:42:21 2017
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -138,16 +138,9 @@ class Ui_MainWindow(object):
         self.gbIamod.setObjectName("gbIamod")
         self.gridLayout_4 = QtGui.QGridLayout(self.gbIamod)
         self.gridLayout_4.setObjectName("gridLayout_4")
-        self.label_8 = QtGui.QLabel(self.gbIamod)
-        self.label_8.setWordWrap(True)
-        self.label_8.setObjectName("label_8")
-        self.gridLayout_4.addWidget(self.label_8, 2, 0, 1, 2)
         self.label_6 = QtGui.QLabel(self.gbIamod)
         self.label_6.setObjectName("label_6")
         self.gridLayout_4.addWidget(self.label_6, 0, 0, 1, 1)
-        self.leIamodTransponder = QtGui.QLineEdit(self.gbIamod)
-        self.leIamodTransponder.setObjectName("leIamodTransponder")
-        self.gridLayout_4.addWidget(self.leIamodTransponder, 2, 2, 1, 2)
         self.label_7 = QtGui.QLabel(self.gbIamod)
         self.label_7.setObjectName("label_7")
         self.gridLayout_4.addWidget(self.label_7, 1, 0, 1, 2)
@@ -211,12 +204,23 @@ class Ui_MainWindow(object):
         self.gridLayout_5.addItem(spacerItem1, 0, 2, 1, 1)
         self.widget = QtGui.QWidget(self.centralwidget)
         self.widget.setObjectName("widget")
-        self.gridLayout_7 = QtGui.QGridLayout(self.widget)
-        self.gridLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_10 = QtGui.QGridLayout(self.widget)
+        self.gridLayout_10.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_10.setObjectName("gridLayout_10")
+        self.tabWidget = QtGui.QTabWidget(self.widget)
+        self.tabWidget.setObjectName("tabWidget")
+        self.tab1 = QtGui.QWidget()
+        self.tab1.setObjectName("tab1")
+        self.gridLayout_7 = QtGui.QGridLayout(self.tab1)
         self.gridLayout_7.setObjectName("gridLayout_7")
         self.webLayout = QtGui.QGridLayout()
         self.webLayout.setObjectName("webLayout")
-        self.gridLayout_7.addLayout(self.webLayout, 0, 0, 1, 2)
+        self.gridLayout_7.addLayout(self.webLayout, 0, 0, 1, 1)
+        self.tabWidget.addTab(self.tab1, "")
+        self.tab2 = QtGui.QWidget()
+        self.tab2.setObjectName("tab2")
+        self.tabWidget.addTab(self.tab2, "")
+        self.gridLayout_10.addWidget(self.tabWidget, 0, 0, 1, 1)
         self.gridLayout_5.addWidget(self.widget, 1, 0, 1, 3)
         self.gridLayout_9.addLayout(self.gridLayout_5, 1, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -244,6 +248,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuAbout.menuAction())
 
         self.retranslateUi(MainWindow)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QObject.connect(self.actionExit, QtCore.SIGNAL("activated()"), MainWindow.close)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -264,12 +269,13 @@ class Ui_MainWindow(object):
 "Configuration\n"
 "File", None, QtGui.QApplication.UnicodeUTF8))
         self.gbIamod.setTitle(QtGui.QApplication.translate("MainWindow", "IAMOD", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_8.setText(QtGui.QApplication.translate("MainWindow", "Transponder Code:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("MainWindow", "Port:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("MainWindow", "Threshold:", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("MainWindow", "Server", None, QtGui.QApplication.UnicodeUTF8))
         self.pbStop.setText(QtGui.QApplication.translate("MainWindow", "Stop Server", None, QtGui.QApplication.UnicodeUTF8))
         self.pbStart.setText(QtGui.QApplication.translate("MainWindow", "Start Server", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab1), QtGui.QApplication.translate("MainWindow", "Graylog", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab2), QtGui.QApplication.translate("MainWindow", "Dashboard", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuAbout.setTitle(QtGui.QApplication.translate("MainWindow", "About", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))

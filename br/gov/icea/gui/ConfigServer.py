@@ -6,10 +6,14 @@ import ConfigParser
 
 import PySide
 from PySide.QtCore import QRegExp, QUrl
-from PySide.QtGui import QMainWindow, QApplication, QMessageBox, QRegExpValidator, QIntValidator, QFileDialog
+from PySide.QtGui import QMainWindow, QApplication, QMessageBox, QRegExpValidator, QIntValidator, QFileDialog, QVBoxLayout
 from PySide.QtWebKit import QWebView, QWebSettings
 
 from wndMain import Ui_MainWindow
+
+from GraphicCanvas import StaticCanvas, DynamicCanvas
+
+from GlobalData import sharedDict
 
 __version__ = '0.1.0'
 
@@ -42,11 +46,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.leIamodPort.setValidator(QIntValidator(1, 65535))
         self.leIamodThreshold.setValidator(QIntValidator(0, 99999))
 
-        transponderRange = "(?:[0-7]?[0-7]?[0-7]?[0-7])"
-        transponderRegex = QRegExp("^" + transponderRange)
-        transponderValidator = QRegExpValidator(self.leIamodTransponder)
-        transponderValidator.setRegExp(transponderRegex)
-        self.leIamodTransponder.setValidator(transponderValidator)
+        # transponderRange = "(?:[0-7]?[0-7]?[0-7]?[0-7])"
+        # transponderRegex = QRegExp("^" + transponderRange)
+        # transponderValidator = QRegExpValidator(self.leIamodTransponder)
+        # transponderValidator.setRegExp(transponderRegex)
+        # self.leIamodTransponder.setValidator(transponderValidator)
 
         #Define functions for GUI actions
         self.pbStart.clicked.connect(self.__startServer)
@@ -71,6 +75,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.view.settings().setAttribute(QWebSettings.LocalStorageEnabled, True)
 
         self.pbConnect.clicked.connect(self.__connectHttpServer)
+
+        l = QVBoxLayout(self.tab2)
+        sc = StaticCanvas(self.tab2, width=5, height=4, dpi=100)
+        dc = DynamicCanvas(self.tab2, width=5, height=4, dpi=100)
+        l.addWidget(sc)
+        l.addWidget(dc)
 
     def __connectHttpServer(self):
         retCode = True
@@ -207,7 +217,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.leAsterixPort.setText(asterixPort)
         self.leAsterixSic.setText(asterixSic)
 
-        self.leIamodTransponder.setText(iamodTranponderCode)
+        # self.leIamodTransponder.setText(iamodTranponderCode)
         self.leIamodPort.setText(iamodPort)
         self.leIamodThreshold.setText(iamodThreshold)
 
@@ -233,7 +243,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         graylogPort = self.leGraylogPort.text()
         graylogHttpPort = self.leGraylogHttpPort.text()
 
-        iamodTranponderCode = self.leIamodTransponder.text()
+        # iamodTranponderCode = self.leIamodTransponder.text()
         iamodPort = self.leIamodPort.text()
         iamodThreshold = self.leIamodThreshold.text()
 
@@ -254,7 +264,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __validateForm(self):
         retCode = True
         retCode &= not self.leIamodThreshold.text()
-        retCode &= not self.leIamodTransponder.text()
+        # retCode &= not self.leIamodTransponder.text()
         retCode &= not self.leIamodPort.text()
         retCode &= not self.leAsterixIP.text()
         retCode &= not self.leAsterixPort.text()

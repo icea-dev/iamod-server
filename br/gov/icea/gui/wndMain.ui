@@ -254,25 +254,12 @@ File</string>
             <string>IAMOD</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_4">
-            <item row="2" column="0" colspan="2">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Transponder Code:</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_6">
               <property name="text">
                <string>Port:</string>
               </property>
              </widget>
-            </item>
-            <item row="2" column="2" colspan="2">
-             <widget class="QLineEdit" name="leIamodTransponder"/>
             </item>
             <item row="1" column="0" colspan="2">
              <widget class="QLabel" name="label_7">
@@ -411,9 +398,28 @@ QGroupBox::title#groupBox {
       </item>
       <item row="1" column="0" colspan="3">
        <widget class="QWidget" name="widget" native="true">
-        <layout class="QGridLayout" name="gridLayout_7">
-         <item row="0" column="0" colspan="2">
-          <layout class="QGridLayout" name="webLayout"/>
+        <layout class="QGridLayout" name="gridLayout_10">
+         <item row="0" column="0">
+          <widget class="QTabWidget" name="tabWidget">
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="tab1">
+            <attribute name="title">
+             <string>Graylog</string>
+            </attribute>
+            <layout class="QGridLayout" name="gridLayout_7">
+             <item row="0" column="0">
+              <layout class="QGridLayout" name="webLayout"/>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tab2">
+            <attribute name="title">
+             <string>Dashboard</string>
+            </attribute>
+           </widget>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -422,7 +428,6 @@ QGroupBox::title#groupBox {
     </item>
    </layout>
    <zorder>frame</zorder>
-   <zorder>gridLayoutWidget</zorder>
    <zorder></zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">

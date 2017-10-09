@@ -54,7 +54,7 @@ class AdsBDecoder(object):
     EVEN = 0
 
 
-    def __init__(self, sic, transponder_code, time_out=0.5):
+    def __init__(self, sic, time_out=0.5):
         """The constructor
 
         Args:
@@ -74,8 +74,6 @@ class AdsBDecoder(object):
 
         ## aircraft_table [dict]:  The aircraft data table.
         self.aircraft_table = {}
-
-        self.transponder_code = transponder_code
 
     def create_socket(self, port):
         """Creates the socket for receiving the ADS-B messages.
@@ -172,9 +170,6 @@ class AdsBDecoder(object):
         type_code = decoder.get_tc(adsb_data)
 
         self.aircraft_table[icao24].set_target_status(target_status)
-
-        if (target_status == 5):
-            self.aircraft_table[icao24].set_transponder_code(self.transponder_code)
 
         # Mensagem de Airbone Position?
         if (type_code in range(9, 19)) and (self.decode_position(icao24, adsb_data) is True):
