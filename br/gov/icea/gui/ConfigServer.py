@@ -44,12 +44,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.leIamodPort.setValidator(QIntValidator(1, 65535))
         self.leIamodThreshold.setValidator(QIntValidator(0, 99999))
 
-        # transponderRange = "(?:[0-7]?[0-7]?[0-7]?[0-7])"
-        # transponderRegex = QRegExp("^" + transponderRange)
-        # transponderValidator = QRegExpValidator(self.leIamodTransponder)
-        # transponderValidator.setRegExp(transponderRegex)
-        # self.leIamodTransponder.setValidator(transponderValidator)
-
         #Define functions for GUI actions
         self.pbStart.clicked.connect(self.__startServer)
         self.pbStop.clicked.connect(self.__stopServer)
@@ -197,10 +191,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except:
             asterixSic = ""
         try:
-            iamodTranponderCode = self.configFile.get("iamod", "transponder")
-        except:
-            iamodTranponderCode = ""
-        try:
             iamodPort = self.configFile.get("iamod", "port")
         except:
             iamodPort = ""
@@ -217,7 +207,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.leAsterixPort.setText(asterixPort)
         self.leAsterixSic.setText(asterixSic)
 
-        # self.leIamodTransponder.setText(iamodTranponderCode)
         self.leIamodPort.setText(iamodPort)
         self.leIamodThreshold.setText(iamodThreshold)
 
@@ -243,7 +232,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         graylogPort = self.leGraylogPort.text()
         graylogHttpPort = self.leGraylogHttpPort.text()
 
-        # iamodTranponderCode = self.leIamodTransponder.text()
         iamodPort = self.leIamodPort.text()
         iamodThreshold = self.leIamodThreshold.text()
 
@@ -255,7 +243,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.configFile.set("graylog", "port", graylogPort)
         self.configFile.set("graylog", "httpPort", graylogHttpPort)
 
-        # self.configFile.set("iamod", "transponder", iamodTranponderCode)
         self.configFile.set("iamod", "port", iamodPort)
         self.configFile.set("iamod", "threshold", iamodThreshold)
 
@@ -264,7 +251,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __validateForm(self):
         retCode = True
         retCode &= not self.leIamodThreshold.text()
-        # retCode &= not self.leIamodTransponder.text()
         retCode &= not self.leIamodPort.text()
         retCode &= not self.leAsterixIP.text()
         retCode &= not self.leAsterixPort.text()
