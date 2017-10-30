@@ -13,8 +13,6 @@ from wndMain import Ui_MainWindow
 
 from GraphicCanvas import StaticCanvas, DynamicCanvas
 
-from GlobalData import sharedDict
-
 __version__ = '0.1.0'
 
 __basePath__ = os.path.abspath(os.path.join(os.getcwd(), '../../../..'))
@@ -45,12 +43,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.leIamodPort.setValidator(QIntValidator(1, 65535))
         self.leIamodThreshold.setValidator(QIntValidator(0, 99999))
-
-        # transponderRange = "(?:[0-7]?[0-7]?[0-7]?[0-7])"
-        # transponderRegex = QRegExp("^" + transponderRange)
-        # transponderValidator = QRegExpValidator(self.leIamodTransponder)
-        # transponderValidator.setRegExp(transponderRegex)
-        # self.leIamodTransponder.setValidator(transponderValidator)
 
         #Define functions for GUI actions
         self.pbStart.clicked.connect(self.__startServer)
@@ -86,9 +78,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         retCode = True
         retCode &= not self.leGraylogIP.text()
         retCode &= not self.leGraylogPort.text()
-        print "Teste: " + str(retCode)
+
         if (not retCode):
-            self.view.load(QUrl("http://" + self.leGraylogIP.text() + ":" + self.leGraylogHttpPort.text() + "/dashboards/599327b2b199cf24b0850bed"))
+            self.view.load(QUrl("http://" + self.leGraylogIP.text() + ":" + self.leGraylogHttpPort.text() + "/dashboards/59ef8317ac4207031e41f294"))
             self.view.show()
         else:
             QMessageBox.warning(self, "Error", "Please, fill Graylog IP and Http Port before connect!", QMessageBox.Ok)
@@ -99,10 +91,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def __startServer(self):
         self.__serverStartStop('START')
+        self.pbStop.setEnabled(True)
+        self.pbStart.setEnabled(False)
 
     def __stopServer(self):
         self.__serverStartStop('STOP')
-        self.pbStart.setEnabled(False)
+        self.pbStart.setEnabled(True)
+        self.pbStop.setEnabled(False)
 
     def __license(self):
          '''Popup a box with about message.'''
@@ -144,7 +139,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if self.__checkServerIsRunning():
                 self.statusbar.showMessage("IAMOD Server is running")
             else:
-                print "teste: " + scriptPath + "startServer.sh %s %s" %(str(iamodModule), str(self.configFileName[0]))
                 subprocess.Popen(scriptPath + "startServer.sh %s %s" %(str(iamodModule), str(self.configFileName[0])), shell=True)
                 self.statusbar.showMessage("Start IAMOD Server")
                 self.__serverStatusImage(True)
@@ -197,10 +191,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except:
             asterixSic = ""
         try:
-            iamodTranponderCode = self.configFile.get("iamod", "transponder")
-        except:
-            iamodTranponderCode = ""
-        try:
             iamodPort = self.configFile.get("iamod", "port")
         except:
             iamodPort = ""
@@ -217,7 +207,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.leAsterixPort.setText(asterixPort)
         self.leAsterixSic.setText(asterixSic)
 
-        # self.leIamodTransponder.setText(iamodTranponderCode)
         self.leIamodPort.setText(iamodPort)
         self.leIamodThreshold.setText(iamodThreshold)
 
@@ -243,7 +232,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         graylogPort = self.leGraylogPort.text()
         graylogHttpPort = self.leGraylogHttpPort.text()
 
-        # iamodTranponderCode = self.leIamodTransponder.text()
         iamodPort = self.leIamodPort.text()
         iamodThreshold = self.leIamodThreshold.text()
 
@@ -255,7 +243,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.configFile.set("graylog", "port", graylogPort)
         self.configFile.set("graylog", "httpPort", graylogHttpPort)
 
-        self.configFile.set("iamod", "transponder", iamodTranponderCode)
         self.configFile.set("iamod", "port", iamodPort)
         self.configFile.set("iamod", "threshold", iamodThreshold)
 
@@ -264,7 +251,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __validateForm(self):
         retCode = True
         retCode &= not self.leIamodThreshold.text()
-        # retCode &= not self.leIamodTransponder.text()
         retCode &= not self.leIamodPort.text()
         retCode &= not self.leAsterixIP.text()
         retCode &= not self.leAsterixPort.text()
