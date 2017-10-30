@@ -78,9 +78,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         retCode = True
         retCode &= not self.leGraylogIP.text()
         retCode &= not self.leGraylogPort.text()
-        print "Teste: " + str(retCode)
+
         if (not retCode):
-            self.view.load(QUrl("http://" + self.leGraylogIP.text() + ":" + self.leGraylogHttpPort.text() + "/dashboards/599327b2b199cf24b0850bed"))
+            self.view.load(QUrl("http://" + self.leGraylogIP.text() + ":" + self.leGraylogHttpPort.text() + "/dashboards/59ef8317ac4207031e41f294"))
             self.view.show()
         else:
             QMessageBox.warning(self, "Error", "Please, fill Graylog IP and Http Port before connect!", QMessageBox.Ok)
